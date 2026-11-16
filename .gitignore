@@ -1,0 +1,4 @@
+.env
+data.db
+serviceAccount.json
+__pycache__/
