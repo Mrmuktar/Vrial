@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Viral Zone</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07060f; --panel:#100d1f; --line:#221b3d; --text:#f4f1ff; --mute:#8a82ab;
+  --p1:#a43cff; --p2:#ff4fd8; --cyan:#27b7ff; --gold:#ffc24b;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans','Hind Siliguri',system-ui,sans-serif;min-height:100%}
+body{padding-bottom:env(safe-area-inset-bottom,0)}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(60% 40% at 80% 0%,rgba(164,60,255,.18),transparent 70%),radial-gradient(50% 35% at 0% 30%,rgba(255,79,216,.10),transparent 70%)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:rgba(7,6,15,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.menu{width:40px;height:40px;border-radius:12px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center}
+.menu i{display:block;width:16px;height:2px;background:var(--text);box-shadow:0 -5px 0 var(--text),0 5px 0 var(--text);border-radius:2px}
+.logo{font-weight:800;font-size:19px;letter-spacing:-.2px;flex:1}
+.logo b{background:linear-gradient(90deg,var(--p1),var(--p2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.join{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px;color:#001a2b;
+  background:linear-gradient(90deg,#3cc4ff,#1ea0f0);box-shadow:0 0 18px rgba(39,183,255,.45)}
+.join .dot{width:7px;height:7px;border-radius:50%;background:#fff}
+.avatar{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;
+  background:linear-gradient(135deg,var(--p1),var(--p2));box-shadow:0 0 18px rgba(255,79,216,.35)}
+
+main{position:relative;padding:14px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:8px;padding:10px 15px;border-radius:999px;font-weight:700;font-size:13px;
+  background:var(--panel);border:1px solid var(--line);color:var(--mute);transition:.2s}
+.chip em{font-style:normal;font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.08)}
+.chip.on{color:#fff;border-color:transparent;background:linear-gradient(90deg,var(--p1),var(--p2));box-shadow:0 6px 22px rgba(164,60,255,.45)}
+.chip.on em{background:rgba(255,255,255,.25)}
+
+h2{font-size:16px;font-weight:800;margin:20px 0 14px;padding-left:10px;border-left:3px solid var(--p2)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{position:relative;border-radius:16px;overflow:hidden;background:var(--panel);border:1px solid var(--line);text-align:left;display:block;width:100%}
+.card:active{transform:scale(.98)}
+.thumb{aspect-ratio:3/4;width:100%;object-fit:cover;display:block;background:linear-gradient(160deg,#241546,#0e0a1f)}
+.shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(7,6,15,.95))}
+.meta{position:absolute;left:0;right:0;bottom:0;padding:10px 11px}
+.meta h3{font-size:13px;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta p{font-size:11px;color:var(--mute);margin-top:4px}
+.play{position:absolute;top:50%;left:50%;transform:translate(-50%,-70%);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25)}
+.play::after{content:"";border-left:14px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent;margin-left:4px}
+.badge{position:absolute;top:8px;left:8px;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:800;color:#2a1b00;background:linear-gradient(90deg,#ffd978,var(--gold))}
+
+.empty{text-align:center;padding:90px 20px;color:#3c3560;font-weight:700}
+.empty span{display:block;font-size:56px;filter:grayscale(1);opacity:.5;margin-bottom:12px}
+.more{display:block;margin:18px auto 30px;padding:11px 26px;border-radius:999px;font-weight:700;font-size:13px;background:var(--panel);border:1px solid var(--line)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.25s;z-index:30}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:78%;max-width:320px;z-index:31;background:var(--panel);border-right:1px solid var(--line);
+  transform:translateX(-100%);transition:.28s;padding:22px 16px;overflow:auto}
+.drawer.on{transform:none}
+.drawer h4{color:var(--mute);font-size:12px;font-weight:700;margin-bottom:12px}
+.drawer button{display:flex;justify-content:space-between;width:100%;padding:13px 12px;border-radius:12px;font-weight:700;font-size:14px;text-align:left}
+.drawer button.on{background:linear-gradient(90deg,rgba(164,60,255,.3),rgba(255,79,216,.15))}
+
+/* player */
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(5,4,12,.96);display:none;flex-direction:column}
+.sheet.on{display:flex}
+.sheet .bar{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.sheet .bar strong{flex:1;font-size:15px;line-height:1.3}
+.x{width:38px;height:38px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:18px}
+.stage{flex:1;display:grid;place-items:center;padding:0 0 env(safe-area-inset-bottom,0)}
+video{width:100%;max-height:100%;background:#000}
+.lock{text-align:center;padding:30px}
+.lock h3{font-size:20px;margin:10px 0 8px}
+.lock p{color:var(--mute);font-size:14px;margin-bottom:20px}
+.cta{padding:13px 28px;border-radius:999px;font-weight:800;background:linear-gradient(90deg,var(--p1),var(--p2));box-shadow:0 8px 26px rgba(164,60,255,.5)}
+.msg{color:var(--mute);font-weight:600;margin-top:14px}
+.cta{display:block;margin:0 auto}
+.cta[disabled]{opacity:.6}
+.cta.alt{margin-top:12px;background:var(--panel);border:1px solid var(--line);box-shadow:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <button class="menu" id="menuBtn" aria-label="Categories"><i></i></button>
+  <div class="logo">Viral <b>Zone</b></div>
+  <button class="join" id="joinBtn"><span class="dot"></span>Join</button>
+  <div class="avatar" id="avatar">S</div>
+</header>
+
+<main>
+  <div class="chips" id="chips"></div>
+  <h2>Latest Premium Content 👇</h2>
+  <div id="list"></div>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer"><h4>ক্যাটাগরি</h4><div id="dlist"></div></aside>
+
+<div class="sheet" id="sheet">
+  <div class="bar"><strong id="ptitle"></strong><button class="x" id="close" aria-label="Close">✕</button></div>
+  <div class="stage" id="stage"></div>
+</div>
+
+<script>
+const tg = window.Telegram?.WebApp; tg?.ready(); tg?.expand();
+try { tg?.setHeaderColor('#07060f'); tg?.setBackgroundColor('#07060f'); } catch(e){}
+const INIT = tg?.initData || '';
+const $ = id => document.getElementById(id);
+const state = {cat:'', page:0, cfg:{}, loading:false};
+
+const u = tg?.initDataUnsafe?.user;
+if (u) $('avatar').textContent = (u.first_name||'S')[0].toUpperCase();
+
+async function j(url){ const r = await fetch(url); if(!r.ok) throw new Error(r.status); return r.json(); }
+
+/* ---------- ads ---------- */
+function loadScript(src, attrs={}){ return new Promise(res=>{ const s=document.createElement('script'); s.src=src;
+  Object.entries(attrs).forEach(([k,v])=>s.setAttribute(k,v)); s.onload=res; s.onerror=res; document.head.appendChild(s); }); }
+async function setupAds(){
+  const a = state.cfg.ads || {}; if(!a.on) return;
+  if(a.adsgram) await loadScript('https://sad.adsgram.ai/js/sad.min.js');
+  if(a.monetag) await loadScript('https://libtl.com/sdk.js', {'data-zone':a.monetag,'data-sdk':'show_'+a.monetag});
+}
+/* returns 'ok' (ad completed), 'fail' (error/skipped) or 'none' (no ad network configured) */
+async function showAd(){
+  const a = state.cfg.ads || {}; if(!a.on) return 'none';
+  try{
+    if(a.adsgram && window.Adsgram){ await window.Adsgram.init({blockId:String(a.adsgram)}).show(); return 'ok'; }
+    if(a.monetag && typeof window['show_'+a.monetag]==='function'){ await window['show_'+a.monetag](); return 'ok'; }
+    if(a.adsterra){ (tg?.openLink||window.open)(a.adsterra); await new Promise(r=>setTimeout(r,9000)); return 'ok'; }
+    return 'none';
+  }catch(e){ return 'fail'; }
+}
+
+/* ---------- list ---------- */
+function card(p){
+  const th = p.th ? `<img class="thumb" loading="lazy" src="/media/thumb/${p.id}" alt="">` : `<div class="thumb"></div>`;
+  return `<button class="card" data-id="${p.id}">${th}<div class="shade"></div><span class="play"></span>
+    ${p.premium?'<span class="badge">💎 Premium</span>':''}
+    <div class="meta"><h3>${esc(p.title)}</h3><p>👁 ${p.views}</p></div></button>`;
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function loadPosts(reset){
+  if(state.loading) return; state.loading = true;
+  if(reset){ state.page = 0; $('list').innerHTML = ''; }
+  try{
+    const d = await j(`/api/posts?cat=${encodeURIComponent(state.cat)}&page=${state.page}`);
+    let g = $('list').querySelector('.grid');
+    if(!g && d.items.length){ $('list').innerHTML = '<div class="grid"></div>'; g = $('list').querySelector('.grid'); }
+    g?.insertAdjacentHTML('beforeend', d.items.map(card).join(''));
+    $('list').querySelector('.more')?.remove();
+    if(d.more){ $('list').insertAdjacentHTML('beforeend','<button class="more">আরও দেখুন</button>'); }
+    if(!d.items.length && state.page===0) $('list').innerHTML = '<div class="empty"><span>🎬</span>No content in this category yet.</div>';
+    state.page++;
+  }catch(e){ $('list').innerHTML = '<div class="empty"><span>⚠️</span>লোড করা যায়নি। আবার চেষ্টা করুন।</div>'; }
+  state.loading = false;
+}
+
+async function loadCats(){
+  const d = await j('/api/categories');
+  const all = [{name:'',label:'All',n:d.total}, ...d.items.map(i=>({name:i.name,label:i.name,n:i.n}))];
+  const draw = (cls) => all.map(c=>`<button class="${cls}${state.cat===c.name?' on':''}" data-cat="${esc(c.name)}">${cls==='chip'?'':''}${esc(c.label)}${cls==='chip'?`<em>${c.n}</em>`:`<span>${c.n}</span>`}</button>`).join('');
+  $('chips').innerHTML = draw('chip'); $('dlist').innerHTML = draw('dc');
+}
+
+function pick(cat){ state.cat = cat; closeDrawer(); loadCats(); loadPosts(true); }
+$('chips').onclick = e => { const b=e.target.closest('[data-cat]'); if(b) pick(b.dataset.cat); };
+$('dlist').onclick = e => { const b=e.target.closest('[data-cat]'); if(b) pick(b.dataset.cat); };
+$('list').onclick = e => {
+  if(e.target.closest('.more')) return loadPosts(false);
+  const c = e.target.closest('.card'); if(c) openPost(+c.dataset.id);
+};
+
+/* ---------- drawer ---------- */
+const openDrawer = () => { $('drawer').classList.add('on'); $('scrim').classList.add('on'); };
+const closeDrawer = () => { $('drawer').classList.remove('on'); $('scrim').classList.remove('on'); };
+$('menuBtn').onclick = openDrawer; $('scrim').onclick = closeDrawer;
+
+/* ---------- join ---------- */
+$('joinBtn').onclick = () => {
+  const l = state.cfg.join_link; if(!l) return tg?.showAlert?.('Join লিংক সেট করা হয়নি।');
+  l.includes('t.me') && tg?.openTelegramLink ? tg.openTelegramLink(l) : (tg?.openLink||window.open)(l);
+};
+
+/* ---------- player ---------- */
+const post = (url) => fetch(url,{method:'POST'}).then(r=>r.json());
+const initQ = encodeURIComponent(INIT);
+
+function showLock(id, d){
+  const join = d.join_link ? '<button class="cta alt" id="lockJoin">📢 Channel Join করুন</button>' : '';
+  $('ptitle').textContent = d.title || '';
+  $('stage').innerHTML = `<div class="lock"><div style="font-size:54px">🔓</div><h3>ভিডিওটি Unlock করুন</h3>
+    <p>একটি ছোট বিজ্ঞাপন দেখলে ${d.hours||24} ঘণ্টার জন্য এই ভিডিও খুলে যাবে।</p>
+    <button class="cta" id="unlockBtn">🔓 Unlock Video</button>${join}<div class="msg" id="umsg"></div></div>`;
+  $('unlockBtn').onclick = () => unlock(id);
+  if(join) $('lockJoin').onclick = () => $('joinBtn').click();
+}
+
+async function unlock(id){
+  const btn = $('unlockBtn'), msg = $('umsg'); btn.disabled = true; msg.textContent = 'বিজ্ঞাপন লোড হচ্ছে…';
+  try{
+    const {nonce} = await post(`/api/unlock/${id}/start?init=${initQ}`);
+    const r = await showAd();
+    if(r === 'fail'){ msg.textContent = 'বিজ্ঞাপন শেষ পর্যন্ত দেখতে হবে। আবার চেষ্টা করুন।'; btn.disabled = false; return; }
+    let d = await post(`/api/unlock/${id}/done?init=${initQ}&nonce=${nonce}`);
+    if(!d.ok && d.reason === 'too_fast'){ msg.textContent = 'অনুগ্রহ করে বিজ্ঞাপনটি পুরোটা দেখুন।'; btn.disabled = false; return; }
+    if(!d.ok){ msg.textContent = 'Unlock হয়নি। আবার চেষ্টা করুন।'; btn.disabled = false; return; }
+    openPost(id);
+  }catch(e){ msg.textContent = 'সমস্যা হয়েছে। আবার চেষ্টা করুন।'; btn.disabled = false; }
+}
+
+async function openPost(id){
+  $('sheet').classList.add('on'); $('ptitle').textContent = '';
+  $('stage').innerHTML = '<div class="msg">লোড হচ্ছে…</div>';
+  try{
+    const d = await j(`/api/play/${id}?init=${initQ}`);
+    if(d.locked) return showLock(id, d);
+    $('ptitle').textContent = d.title;
+    $('stage').innerHTML = `<video controls autoplay playsinline src="${esc(d.url)}"></video>`;
+    $('stage').querySelector('video').onerror = () => { $('stage').innerHTML = '<div class="msg">ভিডিও চালানো যাচ্ছে না।</div>'; };
+  }catch(e){ $('stage').innerHTML = '<div class="msg">ভিডিও লোড হয়নি।</div>'; }
+}
+$('close').onclick = () => { $('sheet').classList.remove('on'); $('stage').innerHTML = ''; };
+
+(async function init(){
+  try{ state.cfg = await j('/api/config'); }catch(e){}
+  setupAds(); await loadCats(); loadPosts(true);
+  const deep = new URLSearchParams(location.search).get('p'); if(deep) openPost(+deep);
+})();
+</script>
+</body>
+</html>
